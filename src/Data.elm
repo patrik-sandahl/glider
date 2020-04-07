@@ -3,12 +3,14 @@ module Data exposing
     , Msg(..)
     )
 
+import Viewport exposing (Viewport)
+
+
 {-| Application main model.
 -}
-
-
 type alias Model =
-    { playTimeMs : Float
+    { viewport : Viewport
+    , playTimeMs : Float
     }
 
 
@@ -16,3 +18,4 @@ type alias Model =
 -}
 type Msg
     = AnimateFrameDelta Float
+    | NewViewportResolution Viewport

@@ -3,15 +3,20 @@ module Update exposing
     , update
     )
 
+import Browser.Dom as Dom
 import Data exposing (Model, Msg(..))
+import Task
+import Viewport
 
 
 {-| Application init function.
 -}
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { playTimeMs = 0 }
-    , Cmd.none
+    ( { viewport = Viewport.init 0 0
+      , playTimeMs = 0.0
+      }
+    , fetchViewportResolution
     )
 
 
@@ -22,5 +27,19 @@ update msg model =
     case msg of
         AnimateFrameDelta deltaTime ->
             ( { model | playTimeMs = model.playTimeMs + deltaTime }
-            , Cmd.none 
+            , Cmd.none
             )
+
+        NewViewportResolution viewport ->
+            ( { model | viewport = viewport }
+            , Cmd.none
+            )
+
+
+fetchViewportResolution : Cmd Msg
+fetchViewportResolution =
+    Task.perform
+        (\viewport ->
+            Viewport.init viewport.viewport.width viewport.viewport.height |> NewViewportResolution
+        )
+        Dom.getViewport
