@@ -3,6 +3,7 @@ module Data exposing
     , Msg(..)
     )
 
+import Pipeline exposing (Pipe, Pipeline)
 import Viewport exposing (Viewport)
 
 
@@ -11,6 +12,8 @@ import Viewport exposing (Viewport)
 type alias Model =
     { viewport : Viewport
     , playTimeMs : Float
+    , pipeline : Pipeline
+    , currentPipe : Pipe
     }
 
 

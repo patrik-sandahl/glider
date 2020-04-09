@@ -5,6 +5,7 @@ module Update exposing
 
 import Browser.Dom as Dom
 import Data exposing (Model, Msg(..))
+import Pipeline exposing (Pipe(..))
 import Task
 import Viewport
 
@@ -15,6 +16,8 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { viewport = Viewport.init 0 0
       , playTimeMs = 0.0
+      , pipeline = Pipeline.init
+      , currentPipe = AspectRatioTest
       }
     , fetchViewportResolution
     )
