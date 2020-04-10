@@ -11,5 +11,10 @@ view : Model -> Html Msg
 view model =
     Html.div
         []
-        [ Pipeline.view model.currentPipe model.viewport model.playTimeMs model.pipeline
+        [ Pipeline.view 
+            model.currentPipe
+            model.viewport
+            model.playTimeMs
+            model.pipeline
+            model.navigator
         ]

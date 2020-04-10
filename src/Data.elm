@@ -3,6 +3,7 @@ module Data exposing
     , Msg(..)
     )
 
+import Navigator exposing (Navigator)
 import Pipeline exposing (Pipe, Pipeline)
 import Viewport exposing (Viewport)
 
@@ -14,6 +15,7 @@ type alias Model =
     , playTimeMs : Float
     , pipeline : Pipeline
     , currentPipe : Pipe
+    , navigator : Navigator
     }
 
 

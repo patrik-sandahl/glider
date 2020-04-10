@@ -19,4 +19,9 @@ type alias Vertex =
 type alias Uniforms =
     { resolution : Vec2
     , playTimeMs : Float
+    , cameraEye : Vec3
+    , cameraForward : Vec3
+    , cameraRight : Vec3
+    , cameraUp : Vec3
+    , cameraFocalLength : Float
     }
