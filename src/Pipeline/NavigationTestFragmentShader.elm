@@ -3,6 +3,7 @@ module Pipeline.NavigationTestFragmentShader exposing (program)
 import Pipeline.Data exposing (Uniforms)
 import WebGL exposing (Shader)
 
+
 program : Shader {} Uniforms {}
 program =
     [glsl|
@@ -72,6 +73,7 @@ float rayMarch(Ray ray)
 void main()
 {
     vec2 uv = normalizedUV();
+
     Ray ray = primaryRay(uv);
 
     vec3 color = vec3(0.0);

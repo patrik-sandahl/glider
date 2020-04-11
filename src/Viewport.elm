@@ -46,4 +46,5 @@ normalizedUV xy viewport =
         v =
             (V2.getY xy - 0.5 * viewport.height) / nd
     in
-    V2.vec2 u v
+    -- Flip v ...
+    V2.vec2 u -v

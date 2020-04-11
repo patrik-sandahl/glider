@@ -3,6 +3,7 @@ module Data exposing
     , Msg(..)
     )
 
+import Math.Vector2 exposing (Vec2)
 import Navigator exposing (Navigator)
 import Pipeline exposing (Pipe, Pipeline)
 import Viewport exposing (Viewport)
@@ -12,6 +13,9 @@ import Viewport exposing (Viewport)
 -}
 type alias Model =
     { viewport : Viewport
+    , mousePos : Vec2
+    , mousePlaneIntersection : Maybe Float
+    , mouseButtonDown : Bool
     , playTimeMs : Float
     , pipeline : Pipeline
     , currentPipe : Pipe
@@ -24,3 +28,7 @@ type alias Model =
 type Msg
     = AnimateFrameDelta Float
     | NewViewportResolution Viewport
+    | NewMousePos Vec2
+    | MouseButtonDown
+    | MouseButtonUp
+    | Ignore
