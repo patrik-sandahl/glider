@@ -3,6 +3,7 @@ module View exposing (view)
 import Data exposing (Model, Msg)
 import Html exposing (Attribute, Html)
 import Html.Attributes as Attr
+import Navigator
 import Pipeline
 
 
@@ -24,13 +25,13 @@ view model =
 
 cursorStyle : Model -> Attribute Msg
 cursorStyle model =
-    case model.mousePlaneIntersection of
-        Just _ ->
-            if model.mouseButtonDown then
-                Attr.style "cursor" "grabbing"
+    if Navigator.isNavigating model.navigator then
+        Attr.style "cursor" "grabbing"
 
-            else
+    else
+        case model.mousePlaneIntersection of
+            Just _ ->
                 Attr.style "cursor" "move"
 
-        Nothing ->
-            Attr.style "cursor" "default"
+            Nothing ->
+                Attr.style "cursor" "default"

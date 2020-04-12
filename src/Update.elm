@@ -53,28 +53,41 @@ update msg model =
                     Viewport.normalizedUV mousePos model.viewport
 
                 mouseRay =
-                    Debug.log "> " <| Camera.uvToRay normalizedMousePos model.navigator.camera
+                    Camera.uvToRay normalizedMousePos model.navigator.camera
 
                 zeroPlane =
                     V3.vec3 0.0 1.0 0.0 |> Plane.init 0.0
 
                 mousePlaneIntersection =
-                    Debug.log ">> " <| Plane.intersect mouseRay zeroPlane
+                    Plane.intersect mouseRay zeroPlane
             in
             ( { model
                 | mousePos = normalizedMousePos
                 , mousePlaneIntersection = mousePlaneIntersection
+                , navigator = Navigator.navigateTo normalizedMousePos model.navigator
               }
             , Cmd.none
             )
 
         MouseButtonDown ->
-            ( { model | mouseButtonDown = True }
+            ( { model
+                | mouseButtonDown = True
+                , navigator =
+                    case model.mousePlaneIntersection of
+                        Just _ ->
+                            Navigator.beginPanning model.mousePos model.navigator
+
+                        Nothing ->
+                            model.navigator
+              }
             , Cmd.none
             )
 
         MouseButtonUp ->
-            ( { model | mouseButtonDown = False }
+            ( { model
+                | mouseButtonDown = False
+                , navigator = Navigator.endNavigation model.navigator
+              }
             , Cmd.none
             )
 

@@ -2,12 +2,13 @@ module Navigator.Camera exposing
     ( Camera
     , init
     , uvToRay
+    --, pan
     )
 
 import Math.Ray as Ray exposing (Ray)
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (Vec3)
-import Navigator.Data exposing (OrientationAxes)
+import Navigator.OrientationAxes as OrientationAxes exposing (OrientationAxes)
 
 
 {-| Camera type.
@@ -59,7 +60,4 @@ uvToRay uv camera =
 
 orientationAxesFrom : Float -> Float -> OrientationAxes
 orientationAxesFrom heading pitch =
-    { forward = V3.vec3 1.0 0.0 0.0
-    , right = V3.vec3 0.0 0.0 1.0
-    , up = V3.vec3 0.0 1.0 0.0
-    }
+    OrientationAxes.defaultCameraOrientation
