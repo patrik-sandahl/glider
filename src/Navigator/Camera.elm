@@ -1,21 +1,23 @@
 module Navigator.Camera exposing
     ( Camera
     , init
-    , uvToRay
-    --, pan
+    ,  uvToRay
+       --, pan
+
     )
 
+import Math.OrientationAxes as OrientationAxes exposing (OrientationAxes)
+import Math.Quaternion as Quat
 import Math.Ray as Ray exposing (Ray)
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (Vec3)
-import Navigator.OrientationAxes as OrientationAxes exposing (OrientationAxes)
 
 
 {-| Camera type.
 -}
 type alias Camera =
     { eye : Vec3
-    , heading : Float
+    , yaw : Float
     , pitch : Float
     , focalLength : Float
     , orientationAxes : OrientationAxes
@@ -27,7 +29,7 @@ type alias Camera =
 init : Vec3 -> Camera
 init eye =
     { eye = eye
-    , heading = 0.0
+    , yaw = 0.0
     , pitch = 0.0
     , focalLength = 1.0
     , orientationAxes = orientationAxesFrom 0.0 0.0
@@ -59,5 +61,6 @@ uvToRay uv camera =
 
 
 orientationAxesFrom : Float -> Float -> OrientationAxes
-orientationAxesFrom heading pitch =
-    OrientationAxes.defaultCameraOrientation
+orientationAxesFrom yaw pitch =
+    Quat.yawPitchRollAxes yaw pitch 0.0
+        OrientationAxes.defaultCameraOrientation

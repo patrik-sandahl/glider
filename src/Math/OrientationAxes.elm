@@ -1,4 +1,4 @@
-module Navigator.OrientationAxes exposing
+module Math.OrientationAxes exposing
     ( OrientationAxes
     , defaultCameraOrientation
     , worldOrientation

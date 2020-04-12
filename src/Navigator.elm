@@ -78,14 +78,19 @@ endNavigation navigator =
 panTo : Vec2 -> Vec2 -> Navigator -> Navigator
 panTo uvFrom uvTo navigator =
     let
-        mouseDir = uvSpaceMouseDir uvFrom uvTo
-        relAngle = uvSpaceMouseDirRelAngle mouseDir
+        mouseDir =
+            uvSpaceMouseDir uvFrom uvTo
+
+        relAngle =
+            uvSpaceMouseDirRelAngle mouseDir
     in
     { navigator | navigationMode = Panning uvTo |> Just }
+
 
 uvSpaceMouseDir : Vec2 -> Vec2 -> Vec2
 uvSpaceMouseDir from to =
     V2.sub to from
+
 
 uvSpaceMouseDirRelAngle : Vec2 -> Float
 uvSpaceMouseDirRelAngle dir =

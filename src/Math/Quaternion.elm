@@ -10,6 +10,7 @@ module Math.Quaternion exposing
     , zero
     )
 
+import Math.OrientationAxes exposing (OrientationAxes)
 import Math.Vector3 as V3 exposing (Vec3)
 
 
@@ -104,32 +105,32 @@ rotate q v =
 
 {-| Rotate the axes forward, up and right using the quaternion.
 -}
-rotateAxes : Quaternion -> ( Vec3, Vec3, Vec3 ) -> ( Vec3, Vec3, Vec3 )
-rotateAxes q ( forward, up, right ) =
-    ( rotate q forward
-    , rotate q up
-    , rotate q right
-    )
+rotateAxes : Quaternion -> OrientationAxes -> OrientationAxes
+rotateAxes quat axes =
+    { forward = rotate quat axes.forward
+    , up = rotate quat axes.up
+    , right = rotate quat axes.right
+    }
 
 
 {-| Rotate the axes forward, up and right in order yaw, pitch and roll.
 -}
-yawPitchRollAxes : Float -> Float -> Float -> ( Vec3, Vec3, Vec3 ) -> ( Vec3, Vec3, Vec3 )
-yawPitchRollAxes yaw pitch roll ( forward, up, right ) =
+yawPitchRollAxes : Float -> Float -> Float -> OrientationAxes -> OrientationAxes
+yawPitchRollAxes yaw pitch roll axes =
     let
         qYaw =
-            axisAngle up yaw
+            axisAngle axes.up yaw
 
-        ( forwardY, upY, rightY ) =
-            rotateAxes qYaw ( forward, up, right )
+        axesYaw =
+            rotateAxes qYaw axes
 
         qPitch =
-            axisAngle rightY pitch
+            axisAngle axesYaw.right pitch
 
-        ( forwardP, upP, rightP ) =
-            rotateAxes qPitch ( forwardY, upY, rightY )
+        axesPitch =
+            rotateAxes qPitch axesYaw
 
         qRoll =
-            axisAngle forwardP roll
+            axisAngle axesPitch.forward roll
     in
-    rotateAxes qRoll ( forwardP, upP, rightP )
+    rotateAxes qRoll axesPitch
