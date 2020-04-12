@@ -1,9 +1,8 @@
 module Navigator.Camera exposing
     ( Camera
     , init
-    ,  uvToRay
-       --, pan
-
+    , pan
+    , uvToRay
     )
 
 import Math.OrientationAxes as OrientationAxes exposing (OrientationAxes)
@@ -60,7 +59,32 @@ uvToRay uv camera =
     Ray.init camera.eye direction
 
 
+pan : Float -> Float -> Camera -> Camera
+pan relAngle screenDist camera =
+    let
+        theta =
+            camera.yaw - relAngle
+
+        axes =
+            OrientationAxes.worldOrientation
+
+        quat =
+            Quat.axisAngle axes.up theta
+
+        moveDir =
+            Quat.rotate quat axes.forward
+                |> V3.negate
+                << V3.normalize
+
+        eye =
+            V3.scale (screenDist * V3.getY camera.eye) moveDir |> V3.add camera.eye
+    in
+    { camera | eye = eye }
+
+
 orientationAxesFrom : Float -> Float -> OrientationAxes
 orientationAxesFrom yaw pitch =
-    Quat.yawPitchRollAxes yaw pitch 0.0
-        OrientationAxes.defaultCameraOrientation
+    Quat.yawPitchRollAxes yaw
+        pitch
+        0.0
+        OrientationAxes.worldOrientation
