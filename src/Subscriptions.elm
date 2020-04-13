@@ -82,11 +82,13 @@ keyDown =
         (keyToMsg KeyDown)
         (Decode.field "key" Decode.string)
 
+
 keyUp : Decode.Decoder Msg
 keyUp =
     Decode.map
         (keyToMsg KeyUp)
         (Decode.field "key" Decode.string)
+
 
 keyToMsg : (Key -> Msg) -> String -> Msg
 keyToMsg msg str =
@@ -96,6 +98,9 @@ keyToMsg msg str =
 
         "2" ->
             msg Pipe1
+
+        "Control" ->
+            msg NavRotate
 
         _ ->
             Ignore

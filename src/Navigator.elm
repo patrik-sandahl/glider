@@ -1,6 +1,7 @@
 module Navigator exposing
     ( Navigator
     , beginPanning
+    , beginRotating
     , camera
     , endNavigation
     , init
@@ -9,7 +10,7 @@ module Navigator exposing
     )
 
 import Math.Vector2 as V2 exposing (Vec2)
-import Math.Vector3 as V3
+import Math.Vector3 as V3 exposing (Vec3)
 import Navigator.Camera as Camera exposing (Camera)
 
 
@@ -17,6 +18,7 @@ import Navigator.Camera as Camera exposing (Camera)
 -}
 type NavigationMode
     = Panning Vec2
+    | Rotating Vec3 Vec2
 
 
 {-| Navigator type .
@@ -58,6 +60,11 @@ beginPanning uv navigator =
     { navigator | navigationMode = Panning uv |> Just }
 
 
+beginRotating : Vec3 -> Vec2 -> Navigator -> Navigator
+beginRotating intersectPos uv navigator =
+    { navigator | navigationMode = Rotating intersectPos uv |> Just }
+
+
 navigateTo : Vec2 -> Navigator -> Navigator
 navigateTo uvTo navigator =
     case navigator.navigationMode of
@@ -65,6 +72,9 @@ navigateTo uvTo navigator =
             case mode of
                 Panning uvFrom ->
                     panTo uvFrom uvTo navigator
+
+                Rotating intersectPos uvFrom ->
+                    rotateTo intersectPos uvFrom uvTo navigator
 
         Nothing ->
             navigator
@@ -88,6 +98,11 @@ panTo uvFrom uvTo navigator =
         | navigationMode = Panning uvTo |> Just
         , camera = Camera.pan relAngle (V2.length mouseDir) navigator.camera
     }
+
+
+rotateTo : Vec3 -> Vec2 -> Vec2 -> Navigator -> Navigator
+rotateTo intersectPos uvFrom uvTo navigator =
+    navigator
 
 
 uvMouseDir : Vec2 -> Vec2 -> Vec2

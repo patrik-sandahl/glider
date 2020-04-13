@@ -4,8 +4,9 @@ module Update exposing
     )
 
 import Browser.Dom as Dom
-import Data exposing (Model, Msg(..), Key(..))
+import Data exposing (Key(..), Model, Msg(..), Key(..))
 import Math.Plane as Plane
+import Math.Ray as Ray
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3
 import Navigator
@@ -23,6 +24,7 @@ init _ =
       , mousePos = V2.vec2 0.0 0.0
       , mousePlaneIntersection = Nothing
       , mouseButtonDown = False
+      , navKeyDown = Nothing
       , playTimeMs = 0.0
       , pipeline = Pipeline.init
       , currentPipe = NavigationTest
@@ -59,7 +61,7 @@ update msg model =
                     V3.vec3 0.0 1.0 0.0 |> Plane.init 0.0
 
                 mousePlaneIntersection =
-                    Plane.intersect mouseRay zeroPlane
+                    Maybe.map (\dist -> Ray.pointAt dist mouseRay) (Plane.intersect mouseRay zeroPlane)
             in
             ( { model
                 | mousePos = normalizedMousePos
@@ -74,8 +76,11 @@ update msg model =
                 | mouseButtonDown = True
                 , navigator =
                     case model.mousePlaneIntersection of
-                        Just _ ->
-                            Navigator.beginPanning model.mousePos model.navigator
+                        Just intersectPos ->
+                            if model.navKeyDown == Just NavRotate then
+                                Navigator.beginRotating intersectPos model.mousePos model.navigator
+                            else
+                                Navigator.beginPanning model.mousePos model.navigator
 
                         Nothing ->
                             model.navigator
@@ -105,7 +110,39 @@ update msg model =
                 , navigator = Navigator.endNavigation model.navigator
               }
             , Cmd.none
-            )        
+            )
+
+        KeyDown NavRotate ->
+            ( { model
+                | navKeyDown = Just NavRotate
+                , navigator =
+                    case model.mousePlaneIntersection of
+                        Just intersectPos ->
+                            if model.mouseButtonDown then
+                                Navigator.endNavigation model.navigator
+                                    |> Navigator.beginRotating intersectPos model.mousePos
+
+                            else
+                                model.navigator
+
+                        Nothing ->
+                            model.navigator
+              }
+            , Cmd.none
+            )
+
+        KeyUp NavRotate ->
+            ( { model
+                | navKeyDown = Nothing
+                , navigator = 
+                    if model.mouseButtonDown then
+                        Navigator.endNavigation model.navigator
+                            |> Navigator.beginPanning model.mousePos
+                    else
+                        Navigator.endNavigation model.navigator
+              }
+            , Cmd.none
+            )
 
         KeyUp _ ->
             ( model

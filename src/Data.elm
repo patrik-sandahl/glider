@@ -5,6 +5,7 @@ module Data exposing
     )
 
 import Math.Vector2 exposing (Vec2)
+import Math.Vector3 exposing (Vec3)
 import Navigator exposing (Navigator)
 import Pipeline exposing (Pipe, Pipeline)
 import Viewport exposing (Viewport)
@@ -15,8 +16,9 @@ import Viewport exposing (Viewport)
 type alias Model =
     { viewport : Viewport
     , mousePos : Vec2
-    , mousePlaneIntersection : Maybe Float
+    , mousePlaneIntersection : Maybe Vec3
     , mouseButtonDown : Bool
+    , navKeyDown : Maybe Key
     , playTimeMs : Float
     , pipeline : Pipeline
     , currentPipe : Pipe
@@ -42,3 +44,4 @@ type Msg
 type Key
     = Pipe0
     | Pipe1
+    | NavRotate

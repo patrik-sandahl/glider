@@ -1,6 +1,7 @@
 module Math.Ray exposing
     ( Ray
     , init
+    , pointAt
     )
 
 import Math.Vector3 as V3 exposing (Vec3)
@@ -19,3 +20,11 @@ type alias Ray =
 init : Vec3 -> Vec3 -> Ray
 init origin =
     Ray origin << V3.normalize
+
+
+{-| Calculate the point at the given distance along the ray.
+-}
+pointAt : Float -> Ray -> Vec3
+pointAt distance ray =
+    V3.scale distance ray.direction
+        |> V3.add ray.origin
