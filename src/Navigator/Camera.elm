@@ -16,8 +16,6 @@ import Math.Vector3 as V3 exposing (Vec3)
 -}
 type alias Camera =
     { eye : Vec3
-    , yaw : Float
-    , pitch : Float
     , focalLength : Float
     , orientationAxes : OrientationAxes
     }
@@ -28,10 +26,8 @@ type alias Camera =
 init : Vec3 -> Camera
 init eye =
     { eye = eye
-    , yaw = 0.0
-    , pitch = 0.0
     , focalLength = 1.0
-    , orientationAxes = orientationAxesFrom 0.0 0.0
+    , orientationAxes = OrientationAxes.worldOrientation
     }
 
 
@@ -59,32 +55,28 @@ uvToRay uv camera =
     Ray.init camera.eye direction
 
 
+{-| Panning the camera using screen space information (in uv coordinates). The relAngle
+is telling the angle of the mouse move vector relative to screen up, and the screenDist
+is the length of the mouse move. Panning is implemented by calculating a direction relative
+to the current forward direction, and move the eye in that direction. Speed of the move
+is related to the hight of the camera.
+-}
 pan : Float -> Float -> Camera -> Camera
 pan relAngle screenDist camera =
     let
-        theta =
-            camera.yaw - relAngle
-
-        axes =
-            OrientationAxes.worldOrientation
-
         quat =
-            Quat.axisAngle axes.up theta
+            Quat.axisAngle OrientationAxes.worldUpAxis -relAngle
+
+        forward =
+            V3.cross OrientationAxes.worldUpAxis camera.orientationAxes.right
 
         moveDir =
-            Quat.rotate quat axes.forward
+            Quat.rotate quat forward
+                |> V3.normalize
                 |> V3.negate
-                << V3.normalize
 
         eye =
-            V3.scale (screenDist * V3.getY camera.eye) moveDir |> V3.add camera.eye
+            V3.scale (screenDist * V3.getY camera.eye) moveDir
+                |> V3.add camera.eye
     in
     { camera | eye = eye }
-
-
-orientationAxesFrom : Float -> Float -> OrientationAxes
-orientationAxesFrom yaw pitch =
-    Quat.yawPitchRollAxes yaw
-        pitch
-        0.0
-        OrientationAxes.worldOrientation
