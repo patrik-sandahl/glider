@@ -4,7 +4,7 @@ module Update exposing
     )
 
 import Browser.Dom as Dom
-import Data exposing (Model, Msg(..))
+import Data exposing (Model, Msg(..), Key(..))
 import Math.Plane as Plane
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3
@@ -88,6 +88,27 @@ update msg model =
                 | mouseButtonDown = False
                 , navigator = Navigator.endNavigation model.navigator
               }
+            , Cmd.none
+            )
+
+        KeyDown Pipe0 ->
+            ( { model
+                | currentPipe = AspectRatioTest
+                , navigator = Navigator.endNavigation model.navigator
+              }
+            , Cmd.none
+            )
+
+        KeyDown Pipe1 ->
+            ( { model
+                | currentPipe = NavigationTest
+                , navigator = Navigator.endNavigation model.navigator
+              }
+            , Cmd.none
+            )        
+
+        KeyUp _ ->
+            ( model
             , Cmd.none
             )
 

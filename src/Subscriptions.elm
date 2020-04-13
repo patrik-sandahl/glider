@@ -1,7 +1,7 @@
 module Subscriptions exposing (subscribe)
 
 import Browser.Events as Events
-import Data exposing (Model, Msg(..))
+import Data exposing (Key(..), Model, Msg(..))
 import Json.Decode as Decode
 import Math.Vector2 as V2
 import Viewport
@@ -17,6 +17,8 @@ subscribe model =
         , Events.onMouseMove (Decode.map2 newMousePos decodeMouseXPos decodeMouseYPos)
         , Events.onMouseDown mouseButtonDown
         , Events.onMouseUp mouseButtonUp
+        , Events.onKeyDown keyDown
+        , Events.onKeyUp keyUp
         , Events.onVisibilityChange
             (\v ->
                 if v == Events.Hidden then
@@ -53,26 +55,47 @@ decodeMouseYPos =
 mouseButtonDown : Decode.Decoder Msg
 mouseButtonDown =
     Decode.map
-        (\v ->
-            case v of
-                0 ->
-                    MouseButtonDown
-
-                _ ->
-                    Ignore
-        )
+        (mouseButtonToMsg MouseButtonDown)
         (Decode.field "button" Decode.int)
 
 
 mouseButtonUp : Decode.Decoder Msg
 mouseButtonUp =
     Decode.map
-        (\v ->
-            case v of
-                0 ->
-                    MouseButtonUp
-
-                _ ->
-                    Ignore
-        )
+        (mouseButtonToMsg MouseButtonUp)
         (Decode.field "button" Decode.int)
+
+
+mouseButtonToMsg : Msg -> Int -> Msg
+mouseButtonToMsg msg v =
+    case v of
+        0 ->
+            msg
+
+        _ ->
+            Ignore
+
+
+keyDown : Decode.Decoder Msg
+keyDown =
+    Decode.map
+        (keyToMsg KeyDown)
+        (Decode.field "key" Decode.string)
+
+keyUp : Decode.Decoder Msg
+keyUp =
+    Decode.map
+        (keyToMsg KeyUp)
+        (Decode.field "key" Decode.string)
+
+keyToMsg : (Key -> Msg) -> String -> Msg
+keyToMsg msg str =
+    case str of
+        "1" ->
+            msg Pipe0
+
+        "2" ->
+            msg Pipe1
+
+        _ ->
+            Ignore

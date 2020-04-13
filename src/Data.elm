@@ -1,5 +1,6 @@
 module Data exposing
-    ( Model
+    ( Key(..)
+    , Model
     , Msg(..)
     )
 
@@ -31,4 +32,13 @@ type Msg
     | NewMousePos Vec2
     | MouseButtonDown
     | MouseButtonUp
+    | KeyDown Key
+    | KeyUp Key
     | Ignore
+
+
+{-| Symbolic keys.
+-}
+type Key
+    = Pipe0
+    | Pipe1
