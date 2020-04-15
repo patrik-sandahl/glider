@@ -9,6 +9,8 @@ module Navigator exposing
     , navigateTo
     )
 
+import Math.OrientationAxes as OrientationAxes
+import Math.Quaternion as Quaternion
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (Vec3)
 import Navigator.Camera as Camera exposing (Camera)
@@ -62,6 +64,10 @@ beginPanning uv navigator =
 
 beginRotating : Vec3 -> Vec2 -> Navigator -> Navigator
 beginRotating intersectPos uv navigator =
+    let
+        foo =
+            Debug.log "br: intersectPos: " intersectPos
+    in
     { navigator | navigationMode = Rotating intersectPos uv |> Just }
 
 
@@ -102,7 +108,35 @@ panTo uvFrom uvTo navigator =
 
 rotateTo : Vec3 -> Vec2 -> Vec2 -> Navigator -> Navigator
 rotateTo intersectPos uvFrom uvTo navigator =
-    navigator
+    let
+        mouseDir =
+            uvMouseDir uvFrom uvTo
+
+        cam =
+            navigator.camera
+
+        iPosToEye =
+            V3.sub cam.eye intersectPos
+
+        groundRotQ =
+            Quaternion.axisAngle OrientationAxes.worldUpAxis 0.005
+
+        camRotQ = Quaternion.axisAngle cam.orientationAxes.up 0.005
+
+        eye =
+            Quaternion.rotate groundRotQ (V3.normalize iPosToEye)
+                |> V3.scale (V3.length iPosToEye)
+                |> V3.add intersectPos     
+    in
+    { navigator
+        | navigationMode = Rotating intersectPos uvTo |> Just
+        , camera = 
+            { cam 
+                | eye = eye 
+                , orientationAxes = Quaternion.rotateAxes camRotQ cam.orientationAxes
+            }
+
+    }
 
 
 uvMouseDir : Vec2 -> Vec2 -> Vec2

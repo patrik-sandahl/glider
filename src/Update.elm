@@ -4,7 +4,7 @@ module Update exposing
     )
 
 import Browser.Dom as Dom
-import Data exposing (Key(..), Model, Msg(..), Key(..))
+import Data exposing (Key(..), Model, Msg(..))
 import Math.Plane as Plane
 import Math.Ray as Ray
 import Math.Vector2 as V2 exposing (Vec2)
@@ -79,6 +79,7 @@ update msg model =
                         Just intersectPos ->
                             if model.navKeyDown == Just NavRotate then
                                 Navigator.beginRotating intersectPos model.mousePos model.navigator
+
                             else
                                 Navigator.beginPanning model.mousePos model.navigator
 
@@ -113,31 +114,37 @@ update msg model =
             )
 
         KeyDown NavRotate ->
-            ( { model
-                | navKeyDown = Just NavRotate
-                , navigator =
-                    case model.mousePlaneIntersection of
-                        Just intersectPos ->
-                            if model.mouseButtonDown then
-                                Navigator.endNavigation model.navigator
-                                    |> Navigator.beginRotating intersectPos model.mousePos
+            ( case model.navKeyDown of
+                Nothing ->
+                    { model
+                        | navKeyDown = Just NavRotate
+                        , navigator =
+                            case model.mousePlaneIntersection of
+                                Just intersectPos ->
+                                    if model.mouseButtonDown then
+                                        Navigator.endNavigation model.navigator
+                                            |> Navigator.beginRotating intersectPos model.mousePos
 
-                            else
-                                model.navigator
+                                    else
+                                        model.navigator
 
-                        Nothing ->
-                            model.navigator
-              }
+                                Nothing ->
+                                    model.navigator
+                    }
+
+                Just _ ->
+                    model
             , Cmd.none
             )
 
         KeyUp NavRotate ->
             ( { model
                 | navKeyDown = Nothing
-                , navigator = 
+                , navigator =
                     if model.mouseButtonDown then
                         Navigator.endNavigation model.navigator
                             |> Navigator.beginPanning model.mousePos
+
                     else
                         Navigator.endNavigation model.navigator
               }
