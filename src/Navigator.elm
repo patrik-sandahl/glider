@@ -112,6 +112,13 @@ rotateTo intersectPos uvFrom uvTo navigator =
         mouseDir =
             uvMouseDir uvFrom uvTo
 
+        xDelta =
+            V2.getX mouseDir
+
+        rotAngle =
+            xDelta * 2.0 * pi
+
+        --yDelta = Debug.log "yDelta: " <| V2.getY mouseDir
         cam =
             navigator.camera
 
@@ -119,23 +126,23 @@ rotateTo intersectPos uvFrom uvTo navigator =
             V3.sub cam.eye intersectPos
 
         groundRotQ =
-            Quaternion.axisAngle OrientationAxes.worldUpAxis 0.005
+            Quaternion.axisAngle OrientationAxes.worldUpAxis rotAngle
 
-        camRotQ = Quaternion.axisAngle cam.orientationAxes.up 0.005
+        camRotQ =
+            Quaternion.axisAngle cam.orientationAxes.up rotAngle
 
         eye =
             Quaternion.rotate groundRotQ (V3.normalize iPosToEye)
                 |> V3.scale (V3.length iPosToEye)
-                |> V3.add intersectPos     
+                |> V3.add intersectPos
     in
     { navigator
         | navigationMode = Rotating intersectPos uvTo |> Just
-        , camera = 
-            { cam 
-                | eye = eye 
+        , camera =
+            { cam
+                | eye = eye
                 , orientationAxes = Quaternion.rotateAxes camRotQ cam.orientationAxes
             }
-
     }
 
 
