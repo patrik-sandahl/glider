@@ -7,7 +7,7 @@ import Browser.Dom as Dom
 import Data exposing (Key(..), Model, Msg(..))
 import Math.Plane as Plane
 import Math.Ray as Ray
-import Math.Vector2 as V2 exposing (Vec2)
+import Math.Vector2 as V2
 import Math.Vector3 as V3
 import Navigator
 import Navigator.Camera as Camera
@@ -25,7 +25,9 @@ init _ =
       , mousePlaneIntersection = Nothing
       , mouseButtonDown = False
       , navKeyDown = Nothing
+      , showHud = False
       , playTimeMs = 0.0
+      , latestFrameTimes = []
       , pipeline = Pipeline.init
       , currentPipe = NavigationTest
       , navigator = Navigator.init
@@ -40,7 +42,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimateFrameDelta deltaTime ->
-            ( { model | playTimeMs = model.playTimeMs + deltaTime }
+            ( { model 
+                | playTimeMs = model.playTimeMs + deltaTime 
+                , latestFrameTimes = deltaTime :: List.take 4 model.latestFrameTimes
+            }
             , Cmd.none
             )
 
@@ -134,6 +139,11 @@ update msg model =
 
                 Just _ ->
                     model
+            , Cmd.none
+            )
+
+        KeyDown Hud ->
+            ( { model | showHud = not model.showHud }
             , Cmd.none
             )
 

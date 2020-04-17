@@ -19,7 +19,9 @@ type alias Model =
     , mousePlaneIntersection : Maybe Vec3
     , mouseButtonDown : Bool
     , navKeyDown : Maybe Key
+    , showHud : Bool
     , playTimeMs : Float
+    , latestFrameTimes : List Float
     , pipeline : Pipeline
     , currentPipe : Pipe
     , navigator : Navigator
@@ -45,3 +47,4 @@ type Key
     = Pipe0
     | Pipe1
     | NavRotate
+    | Hud

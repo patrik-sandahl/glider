@@ -102,5 +102,8 @@ keyToMsg msg str =
         "Control" ->
             msg NavRotate
 
+        "h" ->
+            msg Hud
+
         _ ->
             Ignore
