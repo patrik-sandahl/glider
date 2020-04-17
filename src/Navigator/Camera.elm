@@ -2,11 +2,12 @@ module Navigator.Camera exposing
     ( Camera
     , init
     , pan
+    , rotate
     , uvToRay
     )
 
 import Math.OrientationAxes as OrientationAxes exposing (OrientationAxes)
-import Math.Quaternion as Quat
+import Math.Quaternion as Quaternion
 import Math.Ray as Ray exposing (Ray)
 import Math.Vector2 as V2 exposing (Vec2)
 import Math.Vector3 as V3 exposing (Vec3)
@@ -65,13 +66,13 @@ pan : Float -> Float -> Camera -> Camera
 pan relAngle screenDist camera =
     let
         quat =
-            Quat.axisAngle OrientationAxes.worldUpAxis -relAngle
+            Quaternion.axisAngle OrientationAxes.worldUpAxis -relAngle
 
         forward =
             V3.cross OrientationAxes.worldUpAxis camera.orientationAxes.right
 
         moveDir =
-            Quat.rotate quat forward
+            Quaternion.rotate quat forward
                 |> V3.normalize
                 |> V3.negate
 
@@ -80,3 +81,53 @@ pan relAngle screenDist camera =
                 |> V3.add camera.eye
     in
     { camera | eye = eye }
+
+
+rotate : Vec3 -> Vec2 -> Camera -> Camera
+rotate intersectPos mouseDir camera =
+    let
+        rotAngle =
+            2.0 * pi * V2.getX mouseDir
+
+        mousePitch =
+            pi * V2.getY mouseDir
+
+        currPitchAngle =
+            V3.dot camera.orientationAxes.forward OrientationAxes.worldUpAxis
+                |> acos
+
+        clampedPitchAngle =
+            mousePitch + currPitchAngle |> clamp maxPitchUp maxPitchDown
+
+        pitchAngle =
+            clampedPitchAngle - currPitchAngle
+
+        iPosToEye =
+            V3.sub camera.eye intersectPos
+
+        rotQ =
+            Quaternion.axisAngle OrientationAxes.worldUpAxis rotAngle
+
+        rotAxes =
+            Quaternion.rotateAxes rotQ camera.orientationAxes
+
+        pitchQ =
+            Quaternion.axisAngle rotAxes.right -pitchAngle
+    in
+    { camera
+        | eye =
+            Quaternion.rotate rotQ (V3.normalize iPosToEye)
+                |> V3.scale (V3.length iPosToEye)
+                |> V3.add intersectPos
+        , orientationAxes = Quaternion.rotateAxes pitchQ rotAxes
+    }
+
+
+maxPitchDown : Float
+maxPitchDown =
+    pi * (3.0 / 4.0)
+
+
+maxPitchUp : Float
+maxPitchUp =
+    pi * (1.0 / 4.0)
