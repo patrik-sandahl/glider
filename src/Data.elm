@@ -46,5 +46,6 @@ type Msg
 type Key
     = Pipe0
     | Pipe1
+    | Pipe2
     | NavRotate
     | Hud

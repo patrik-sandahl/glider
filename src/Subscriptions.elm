@@ -99,6 +99,9 @@ keyToMsg msg str =
         "2" ->
             msg Pipe1
 
+        "3" ->
+            msg Pipe2
+
         "Control" ->
             msg NavRotate
 

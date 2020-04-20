@@ -23,9 +23,10 @@ view model =
             model.navigator
         ]
 
+
 viewHud : Model -> Html Msg
 viewHud model =
-  Html.div
+    Html.div
         [ Attr.style "display" "inline-block"
         , Attr.style "position" "fixed"
         , Attr.style "left" "10px"
@@ -41,8 +42,11 @@ viewHud model =
             else
                 "hidden"
         ]
-        [ let fps = String.fromInt (calcFps model.latestFrameTimes |> round) ++ " FPS"
-          in fps |> Html.text
+        [ let
+            fps =
+                String.fromInt (calcFps model.latestFrameTimes |> round) ++ " FPS"
+          in
+          fps |> Html.text
         ]
 
 
@@ -58,6 +62,7 @@ cursorStyle model =
 
             Nothing ->
                 Attr.style "cursor" "default"
+
 
 calcFps : List Float -> Float
 calcFps latestFrameTimes =

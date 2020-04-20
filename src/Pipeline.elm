@@ -13,6 +13,7 @@ import Pipeline.AspectRatioTestFragmentShader as AspectRatioFragmentShader
 import Pipeline.Data exposing (Vertex)
 import Pipeline.NavigationTestFragmentShader as NavigationTestFragmentShader
 import Pipeline.QuadVertexShader as QuadVertexShader
+import Pipeline.TerrainTestFragmentShader as TerrainTestFragmentShader
 import Viewport exposing (Viewport)
 import WebGL exposing (Mesh)
 
@@ -29,6 +30,7 @@ type alias Pipeline =
 type Pipe
     = AspectRatioTest
     | NavigationTest
+    | TerrainTest
 
 
 {-| Initialize the pipeline.
@@ -51,6 +53,9 @@ view pipe viewport playTimeMs pipeline navigator =
 
                 NavigationTest ->
                     NavigationTestFragmentShader.program
+
+                TerrainTest ->
+                    TerrainTestFragmentShader.program
     in
     WebGL.toHtmlWith
         [ WebGL.antialias

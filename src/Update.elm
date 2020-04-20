@@ -42,10 +42,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimateFrameDelta deltaTime ->
-            ( { model 
-                | playTimeMs = model.playTimeMs + deltaTime 
+            ( { model
+                | playTimeMs = model.playTimeMs + deltaTime
                 , latestFrameTimes = deltaTime :: List.take 4 model.latestFrameTimes
-            }
+              }
             , Cmd.none
             )
 
@@ -113,6 +113,14 @@ update msg model =
         KeyDown Pipe1 ->
             ( { model
                 | currentPipe = NavigationTest
+                , navigator = Navigator.endNavigation model.navigator
+              }
+            , Cmd.none
+            )
+
+        KeyDown Pipe2 ->
+            ( { model
+                | currentPipe = TerrainTest
                 , navigator = Navigator.endNavigation model.navigator
               }
             , Cmd.none
