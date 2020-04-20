@@ -29,7 +29,7 @@ init _ =
       , playTimeMs = 0.0
       , latestFrameTimes = []
       , pipeline = Pipeline.init
-      , currentPipe = NavigationTest
+      , currentPipe = TerrainTest
       , navigator = Navigator.init
       }
     , fetchViewportResolution

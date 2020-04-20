@@ -19,6 +19,13 @@ uniform vec3 cameraRight;
 uniform vec3 cameraUp;
 uniform float cameraFocalLength;
 
+const int Octaves = 8;
+
+const float MaxDistance = 100.0;
+const float StepLength = 0.1;
+
+const vec3 LightDir = normalize(vec3(1.0, 1.0, 0.0));
+
 const mat3 m3  = mat3( 0.00,  0.80,  0.60,
                       -0.80,  0.36, -0.48,
                       -0.60, -0.48,  0.64 );
@@ -57,10 +64,46 @@ vec2 normalizedUV()
     return (gl_FragCoord.xy - 0.5 * resolution) / min(resolution.x, resolution.y);
 }
 
+// Function that directly ray marches the fbm function (very slow). If no ray is intersecting
+// a negative height value will be returned in the x component of the vec4.
+vec4 rayMarchTerrain(Ray ray)
+{
+    // Step along the ray.    
+    for (float d0 = 0.0; d0 < MaxDistance; d0 += StepLength) {
+        vec3 pos = pointAt(ray, d0);
+        vec4 terrain = fbmd(vec3(pos.x, 1.0, pos.z) * 0.3);
+        terrain.x *= 2.0;
+        if (pos.y < terrain.x) {
+            return terrain;
+        }        
+    }
+
+    // No terrain intersection.
+    return vec4(-1000.0);
+}
+
+vec3 derivToNormal(vec3 deriv)
+{
+    vec3 tangent = vec3(1.0, deriv.x, 0.0);
+    vec3 bitangent = vec3(0.0, deriv.z, 1.0);
+    return normalize(cross(bitangent, tangent));
+    //return normalize(vec3(-deriv.x, 1.0, -deriv.z));
+}
+
 void main()
 {
     vec2 uv = normalizedUV();
-    gl_FragColor = vec4(uv.x + 0.5, uv.y + 0.5, 0.0, 1.0);
+    Ray ray = primaryRay(uv);
+
+    vec4 terrain = rayMarchTerrain(ray);
+
+    vec3 color = vec3(0.0, 0.0, 0.5);
+    if (terrain.x >= -10.0) { // Hack
+        float diffuse = dot(derivToNormal(terrain.yzw), LightDir);
+        color = vec3(diffuse);
+    }
+
+    gl_FragColor = vec4(color, 1.0);
 }
 
 // From IQ.
@@ -74,7 +117,7 @@ vec4 fbmd(vec3 x)
     mat3  m = mat3(1.0,0.0,0.0,
                    0.0,1.0,0.0,
                    0.0,0.0,1.0);
-    for( int i=0; i<8; i++ )
+    for( int i = 0; i < Octaves; ++i )
     {
         vec4 n = noised(x);
         a += b*n.x;          // accumulate values		
