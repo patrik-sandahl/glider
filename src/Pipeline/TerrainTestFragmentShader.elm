@@ -20,7 +20,9 @@ uniform vec3 cameraUp;
 uniform float cameraFocalLength;
 
 const float MaxDistance = 100.0;
+const float HeightScale = 1.0;
 const float StepLength = 0.01;
+const float SurfaceEpsilon = 0.01;
 
 const int Octaves = 2;
 
@@ -65,6 +67,24 @@ vec2 normalizedUV()
     return (gl_FragCoord.xy - 0.5 * resolution) / min(resolution.x, resolution.y);
 }
 
+vec4 upPlane(float distance)
+{
+    return vec4(distance, vec3(0.0, 1.0, 0.0));
+}
+
+float rayPlaneIntersection(Ray ray, vec4 plane)
+{
+    float nd = dot(ray.direction, plane.yzw);
+    float pn = dot(ray.origin, plane.yzw);
+
+    if (nd < 0.0) {
+        float t = (plane.x - pn) / nd;
+        return t >= 0.0 ? t : -1.0;
+    } else {
+        return -1.0;
+    }
+}
+
 vec3 derivToNormal(vec3 deriv)
 {
     vec3 tangent = vec3(1.0, deriv.x, 0.0);
@@ -77,10 +97,18 @@ vec3 derivToNormal(vec3 deriv)
 // vec4(distance, normal) if intersects, otherwise vec4(MaxDistance, vec3(0)).
 vec4 rayMarchTerrain(Ray ray)
 {
+    float d0 = rayPlaneIntersection(ray, upPlane(HeightScale + SurfaceEpsilon));
+
+    if (d0 < 0.0) {
+        return vec4(MaxDistance, vec3(0.0));
+    }
+
     // Step along the ray.    
-    for (float d0 = 0.0; d0 < MaxDistance; d0 += StepLength) {
-        vec3 pos = pointAt(ray, d0);
-        vec4 terrain = fbmd(vec3(pos.x, 1.0, pos.z), 0.3, 1.0);        
+    for (float d = 0.0; d < MaxDistance; d += StepLength) {
+        if (d + d0 >= MaxDistance) break;
+
+        vec3 pos = pointAt(ray, d + d0);
+        vec4 terrain = fbmd(vec3(pos.x, 1.0, pos.z), 0.3, HeightScale);        
         if (pos.y < terrain.x) {
             return vec4(d0, derivToNormal(terrain.yzw));
         }        
