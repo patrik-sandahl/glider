@@ -19,10 +19,10 @@ uniform vec3 cameraRight;
 uniform vec3 cameraUp;
 uniform float cameraFocalLength;
 
-const int Octaves = 8;
-
 const float MaxDistance = 100.0;
-const float StepLength = 0.1;
+const float StepLength = 0.01;
+
+const int Octaves = 2;
 
 const vec3 LightDir = normalize(vec3(1.0, 1.0, 0.0));
 
@@ -39,6 +39,7 @@ struct Ray {
 };
 
 vec4 fbmd(vec3 x);
+vec4 fbmd(vec3 x, float terrainScale, float heightScale);
 vec4 noised(vec3 x);
 
 Ray makeRay(vec3 origin, vec3 direction)
@@ -64,30 +65,29 @@ vec2 normalizedUV()
     return (gl_FragCoord.xy - 0.5 * resolution) / min(resolution.x, resolution.y);
 }
 
-// Function that directly ray marches the fbm function (very slow). If no ray is intersecting
-// a negative height value will be returned in the x component of the vec4.
-vec4 rayMarchTerrain(Ray ray)
-{
-    // Step along the ray.    
-    for (float d0 = 0.0; d0 < MaxDistance; d0 += StepLength) {
-        vec3 pos = pointAt(ray, d0);
-        vec4 terrain = fbmd(vec3(pos.x, 1.0, pos.z) * 0.3);
-        terrain.x *= 2.0;
-        if (pos.y < terrain.x) {
-            return terrain;
-        }        
-    }
-
-    // No terrain intersection.
-    return vec4(-1000.0);
-}
-
 vec3 derivToNormal(vec3 deriv)
 {
     vec3 tangent = vec3(1.0, deriv.x, 0.0);
     vec3 bitangent = vec3(0.0, deriv.z, 1.0);
     return normalize(cross(bitangent, tangent));
     //return normalize(vec3(-deriv.x, 1.0, -deriv.z));
+}
+
+// Function that directly ray marches the fbm function (very slow). The vec4 is
+// vec4(distance, normal) if intersects, otherwise vec4(MaxDistance, vec3(0)).
+vec4 rayMarchTerrain(Ray ray)
+{
+    // Step along the ray.    
+    for (float d0 = 0.0; d0 < MaxDistance; d0 += StepLength) {
+        vec3 pos = pointAt(ray, d0);
+        vec4 terrain = fbmd(vec3(pos.x, 1.0, pos.z), 0.3, 1.0);        
+        if (pos.y < terrain.x) {
+            return vec4(d0, derivToNormal(terrain.yzw));
+        }        
+    }
+
+    // No terrain intersection.
+    return vec4(MaxDistance, vec3(0.0));
 }
 
 void main()
@@ -98,8 +98,8 @@ void main()
     vec4 terrain = rayMarchTerrain(ray);
 
     vec3 color = vec3(0.0, 0.0, 0.5);
-    if (terrain.x >= -10.0) { // Hack
-        float diffuse = dot(derivToNormal(terrain.yzw), LightDir);
+    if (terrain.x < MaxDistance) {
+        float diffuse = dot(terrain.yzw, LightDir);
         color = vec3(diffuse);
     }
 
@@ -127,6 +127,11 @@ vec4 fbmd(vec3 x)
         m = f*m3i*m;
     }
 	return vec4( a, d );
+}
+
+vec4 fbmd(vec3 x, float terrainScale, float heightScale)
+{
+    return fbmd(x * terrainScale) * heightScale;
 }
 
 // From IQ.
